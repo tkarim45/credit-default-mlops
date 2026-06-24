@@ -1,0 +1,29 @@
+# Full local observability stack: model API + Prometheus + Grafana.
+#   docker compose up --build   ->  API :8000 · Prometheus :9090 · Grafana :3000 (admin/admin)
+services:
+  app:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      DECISION_THRESHOLD: "0.5"
+    # serve a model trained on the host (mount artifacts) — or bake it into the image
+    volumes:
+      - ./artifacts:/app/artifacts:ro
+      - ./reports:/app/reports:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on: [app]
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - ./monitoring/grafana:/etc/grafana/provisioning:ro
+    depends_on: [prometheus]

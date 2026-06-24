@@ -1,0 +1,77 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python -m cdmlops.data --n-ref 12000 --n-cur 4000 --seed 7
+    deps:
+    - path: src/cdmlops/config.py
+      hash: md5
+      md5: 4039fa89dc4037c6ce8d6d5dfac2340f
+      size: 1640
+    - path: src/cdmlops/data.py
+      hash: md5
+      md5: 3df10558e132fe0843d202924d5b57b6
+      size: 4148
+    outs:
+    - path: data/current.parquet
+      hash: md5
+      md5: 3db94ce0d51c83f217cc85f1bbad8794
+      size: 317391
+    - path: data/reference.parquet
+      hash: md5
+      md5: de7c640b9df3ffd24b5dd92be40f2193
+      size: 961768
+  train:
+    cmd: python -m cdmlops.train --seed 7
+    deps:
+    - path: data/reference.parquet
+      hash: md5
+      md5: de7c640b9df3ffd24b5dd92be40f2193
+      size: 961768
+    - path: src/cdmlops/features.py
+      hash: md5
+      md5: 2450d24462a81faa865d6fc42d1af7c3
+      size: 898
+    - path: src/cdmlops/train.py
+      hash: md5
+      md5: 87a9c252fbf349123199b0e038355c70
+      size: 2776
+    outs:
+    - path: artifacts/metrics.json
+      hash: md5
+      md5: 41957f998480749950581fd2d4afb1a3
+      size: 175
+    - path: artifacts/model.pkl
+      hash: md5
+      md5: 9b6ad44738ccb12fbd2bffe117171456
+      size: 981631
+  evaluate:
+    cmd: python -m cdmlops.evaluate
+    deps:
+    - path: artifacts/metrics.json
+      hash: md5
+      md5: 41957f998480749950581fd2d4afb1a3
+      size: 175
+    - path: src/cdmlops/evaluate.py
+      hash: md5
+      md5: 933641fe996d3d83f80d8304d92bdb31
+      size: 2176
+  drift:
+    cmd: python -m cdmlops.drift
+    deps:
+    - path: data/current.parquet
+      hash: md5
+      md5: 3db94ce0d51c83f217cc85f1bbad8794
+      size: 317391
+    - path: data/reference.parquet
+      hash: md5
+      md5: de7c640b9df3ffd24b5dd92be40f2193
+      size: 961768
+    - path: src/cdmlops/drift.py
+      hash: md5
+      md5: 6aac4b237affa2de55a2de779280efd9
+      size: 3964
+    outs:
+    - path: reports/drift.json
+      hash: md5
+      md5: d917a14492b12930a9e2e72671b175e9
+      size: 578

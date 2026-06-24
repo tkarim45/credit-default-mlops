@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: credit-default-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["app:8000"]   # docker-compose service name; use localhost:8000 if running bare

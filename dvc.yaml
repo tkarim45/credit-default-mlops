@@ -1,0 +1,39 @@
+# Reproducible DVC pipeline: `dvc repro` runs only the stages whose deps changed.
+stages:
+  prepare:
+    cmd: python -m cdmlops.data --n-ref 12000 --n-cur 4000 --seed 7
+    deps:
+      - src/cdmlops/data.py
+      - src/cdmlops/config.py
+    outs:
+      - data/reference.parquet
+      - data/current.parquet
+
+  train:
+    cmd: python -m cdmlops.train --seed 7
+    deps:
+      - src/cdmlops/train.py
+      - src/cdmlops/features.py
+      - data/reference.parquet
+    outs:
+      - artifacts/model.pkl
+    metrics:
+      - artifacts/metrics.json:
+          cache: false
+
+  evaluate:
+    # the quality gate — non-zero exit fails `dvc repro` (and CI)
+    cmd: python -m cdmlops.evaluate
+    deps:
+      - src/cdmlops/evaluate.py
+      - artifacts/metrics.json
+
+  drift:
+    cmd: python -m cdmlops.drift
+    deps:
+      - src/cdmlops/drift.py
+      - data/reference.parquet
+      - data/current.parquet
+    outs:
+      - reports/drift.json:
+          cache: false

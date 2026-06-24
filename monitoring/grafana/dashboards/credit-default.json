@@ -1,0 +1,47 @@
+{
+  "title": "Credit Default — Model Serving & Drift",
+  "uid": "credit-default",
+  "schemaVersion": 39,
+  "timezone": "browser",
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "type": "stat", "title": "Prediction rate (req/s)", "id": 1,
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(rate(cdm_predictions_total[1m]))", "legendFormat": "all" }]
+    },
+    {
+      "type": "timeseries", "title": "Approve vs decline (req/s)", "id": 2,
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 0 },
+      "targets": [{ "expr": "sum by (outcome) (rate(cdm_predictions_total[1m]))", "legendFormat": "{{outcome}}" }]
+    },
+    {
+      "type": "timeseries", "title": "Predict latency p50 / p95 (s)", "id": 3,
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 6 },
+      "targets": [
+        { "expr": "histogram_quantile(0.5, sum(rate(cdm_predict_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(cdm_predict_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "type": "timeseries", "title": "Mean predicted default probability", "id": 4,
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 6 },
+      "targets": [{ "expr": "sum(rate(cdm_predicted_default_probability_sum[5m])) / sum(rate(cdm_predicted_default_probability_count[5m]))", "legendFormat": "mean score" }]
+    },
+    {
+      "type": "gauge", "title": "Drift share (features drifted vs reference)", "id": 5,
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 13 },
+      "fieldConfig": { "defaults": { "min": 0, "max": 1, "thresholds": { "steps": [
+        { "color": "green", "value": 0 }, { "color": "orange", "value": 0.2 }, { "color": "red", "value": 0.3 } ] } } },
+      "targets": [{ "expr": "cdm_drift_share", "legendFormat": "share" }]
+    },
+    {
+      "type": "stat", "title": "Dataset drift alarm", "id": 6,
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 13 },
+      "fieldConfig": { "defaults": { "mappings": [
+        { "type": "value", "options": { "0": { "text": "stable", "color": "green" }, "1": { "text": "DRIFT", "color": "red" } } } ] } },
+      "targets": [{ "expr": "cdm_dataset_drift", "legendFormat": "drift" }]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# pipeline outputs (DVC-tracked; regenerate with `dvc repro` / `make pipeline`)
+data/*.parquet
+artifacts/
+reports/
+mlruns/
+mlartifacts/
+mlflow.db
+.dvc/cache/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+env/
+
+# os / editor
+.DS_Store
+.vscode/
+.idea/
