@@ -99,7 +99,7 @@ has real drift to catch:
   Evidently's fast-moving API can never break the pipeline.
 
 PSI guide: <0.1 stable · 0.1–0.2 moderate · >0.2 drifted. Dataset-drift alarm fires when
-the share of drifted features exceeds 0.30.
+the share of drifted features exceeds 0.25.
 
 ---
 
